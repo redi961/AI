@@ -3,15 +3,15 @@ import math
 
 DELTA = 0.01   # Mutation step size
 NumEval = 0    # Total number of evaluations
+LIMIT_STUCK = 50 # 100 번의 계산값 동안 더 나은 값을 찾지못하면 종료함
 
 def main():
-    # Create an instance of numerical optimization problem
     # 입력 txt 파일에서 수식과 변수의 범위를 읽어와 반환
-    p = createProblem()   # 'p': (expr, domain)
 
+    p = createProblem()   # 'p': (expr, domain)
     # Call the search algorithm
     # SteepestAscent 알고리즘을 실행하여 solution을 구하기
-    solution, minimum = steepestAscent(p)
+    solution, minimum = firstChoice(p)
 
     # Show the problem and algorithm settings
     describeProblem(p)
@@ -21,7 +21,7 @@ def main():
     displayResult(solution, minimum)
 
 
-def createProblem(): ###
+def createProblem(): 
     ## Read in an expression and its domain from a file.
     ## Then, return a problem 'p'.
     ## 'p' is a tuple of 'expression' and 'domain'
@@ -71,22 +71,23 @@ def randomInit(p):
 
     return init    
 
-def steepestAscent(p):
+def firstChoice(p):
     # Random한 초기값을 생성
     current = randomInit(p)
     # 초기값에 대한 함수값을 계산
     valueC = evaluate(current, p)
-
-    # 계산을 반복하며 mutant를 생성후 더 나은 solution을 탐색
-    while True :
-        # mutant를 생성
-        neighbors = mutants(current, p)
-
-        # mutant 중 가장 좋은 solution을 선택
-        
-        
+    i = 0
+    # 지정한 한계값 까지의 계산
+    while i < LIMIT_STUCK :
+        successor = randomMutant(current, p)
+        valueS = evaluate(successor, p)
         # best solution 업데이트
-        
+        if valueS >= valueC :
+            current = successor
+            valueC = valueS
+            i = 0 # 갱신에 성공하였을때 LIMIT 수치를 0으로 초기화함
+        else :
+            i += 1 # 갱신이 없을때 LIMIT수치를 1 상승시킴
     # Best solution과 그때의 Cost를 반환
     return current, valueC
 
@@ -120,29 +121,18 @@ def evaluate(current, p):
      # cmd = varName[i] + '=' str(current[i])
      # exec(cmd)
     valueC = eval(expression)
-
     # 함수를 current 를 이용하여 계산했을때의 값
     return valueC
-
-
-def mutants(current, p):
-    # mutate 함수를 사용해 +DELTA, -DELTA 두가지 경우에 대한 mutant 생성
-    # 모든 변수에 대해 mutation 실시하여 list 형태로 저장하여 반환
-    neighbors = []
-    #m = mutate(current, 2, DELTA, p)
-
-    #모든 x값들에 대하여
-    # +Delta, -Delta로 mutate 실시
-
-    for i in range(len(current)) :
-        mu = mutate(current, i, DELTA, p)
-        neighbors.append(mu)
-        mu = mutate(current, i, -DELTA, p)
-        neighbors.append(mu)
     
-    return neighbors     
-
-
+def randomMutant(current, p) :
+  # Pick a random locus
+  i = random.randint(0, len(current) -1) # 랜덤한 시작지점 i 설정
+  if random.uniform(0, 1) > 0.5 :
+    d = DELTA
+  else : 
+    d = -DELTA
+  return mutate(current, i, d, p)
+  
 def mutate(current, i, d, p): ## Mutate i-th of 'current' if legal
     # 현재 값에대한 복사본을 slicing을 이용해 생성
     # neighbor = current를 복사한다
@@ -181,8 +171,6 @@ def bestOf(neighbors, p):
             bestValue = newValue
 
     # 3. 모두 다 비교가 끝난 후 best를 반환
-
-    
     return best, bestValue
 
 def describeProblem(p):

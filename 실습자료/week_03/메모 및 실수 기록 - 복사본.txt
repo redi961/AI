@@ -4,6 +4,10 @@ string을 함수로 -> eval
 
 C:\msh\AI\실습자료\week_03\Search Tool Sample Problems\convex.txt
 
+C:\msh\AI\실습자료\week_03\Search Tool Sample Problems\Griewank.txt
+
+C:\msh\AI\실습자료\week_03\Search Tool Sample Problems\tsp30.txt
+
 ====================
 
 디버그 모드중 붙여넣기 : shift + insert
@@ -49,3 +53,11 @@ exec (varNames[0] + '=' + str(current[0])
 ========
 
 파이썬은 if문 사용간 and와 or을 텍스트로 입력해야함 주의 할것
+
+Current <-> Best 형태의 알고리즘은 Greedy 라고 칭함
+
+week_03\Search_Tool_Sample_Problems\Convex.txt
+
+==========
+
+
